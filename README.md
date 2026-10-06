@@ -3,14 +3,52 @@
 This project is an AI-powered WhatsApp automation system designed to handle conversations hands-free, providing context-aware, personalized replies.
 
 ## Architecture
-1. WhatsApp Message In
-2. -> Router
-3. -> Decision Engine
-4. -> Retrieval (History Brain)
-5. -> Persona Injection (Persona Brain)
-6. -> Generation
-7. -> Human-like Delay
-8. -> Send via Baileys
+
+```mermaid
+graph TD
+    A[WhatsApp Message In] --> B[Router]
+    B --> C[Decision Engine]
+    C -->|Reply| D[Retrieval]
+    C -->|Ignore| Z[End]
+    D --> E[Persona Injection]
+    E --> F[Generation]
+    F --> G[Human-like Delay]
+    G --> H[Send via Baileys]
+
+    subgraph "Rules & Logic"
+        B
+        C
+    end
+
+    subgraph "The Two Brains"
+        D
+        E
+    end
+
+    subgraph "Plumbing"
+        G
+        H
+    end
+
+    B["Router<br/>(Rule-based / No AI)"]
+    C["Decision Engine<br/>(Mostly Rule-based)"]
+    D["Retrieval<br/>(History Brain)"]
+    E["Persona Injection<br/>(Persona Brain)"]
+    F["Generation<br/>(Brains Combined)"]
+    G["Human-like Delay<br/>(Plumbing)"]
+    H["Send via Baileys<br/>(Plumbing)"]
+```
+
+### Architecture Notes
+
+1. **Router:**
+   "Looks up phone number in a table I maintain — no AI"
+
+2. **Decision Engine:**
+   "Cheap rules first, one AI call only if truly ambiguous"
+
+3. **Retrieval:**
+   "Searches only the matching relationship's memory (family/friend/professional/unknown)"
 
 ## Two-Brain Architecture
 - **History Brain (Retrieval):** Manages the factual context and past conversation history, ensuring the agent remembers relevant details about interactions.
