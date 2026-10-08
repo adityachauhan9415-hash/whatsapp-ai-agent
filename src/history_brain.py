@@ -3,7 +3,7 @@ import hashlib
 from sentence_transformers import SentenceTransformer
 
 # Initialize embedding model
-EMBEDDING_MODEL = SentenceTransformer('all-MiniLM-L6-v2')
+EMBEDDING_MODEL = SentenceTransformer('intfloat/multilingual-e5-small')
 
 def generate_unique_id(pair: dict) -> str:
     """Generate a deterministic unique ID for a memory record."""
@@ -13,9 +13,10 @@ def generate_unique_id(pair: dict) -> str:
 # Initialize Chroma client
 CHROMA_CLIENT = chromadb.PersistentClient(path="data/chroma")
 
-def generate_embedding(text: str):
+def generate_embedding(text: str, is_query: bool = False):
     """Generate embedding for given text using the sentence transformer model."""
-    return EMBEDDING_MODEL.encode(text).tolist()
+    prefix = "query: " if is_query else "passage: "
+    return EMBEDDING_MODEL.encode(prefix + text).tolist()
 
 
 def get_chroma_collection(collection_name: str, client=None):
@@ -27,8 +28,8 @@ def get_chroma_collection(collection_name: str, client=None):
 
 def ingest_memory_pair(pair: dict, client=None):
     """Ingest a memory pair into the appropriate Chroma collection."""
-    # Embed only the incoming text
-    embedding = generate_embedding(pair["incoming"])
+    # Embed only the incoming text as a passage
+    embedding = generate_embedding(pair["incoming"], is_query=False)
 
     # Store in appropriate collection
     collection_name = f"whatsapp_memory_{pair['relationship']}"
@@ -50,8 +51,8 @@ def ingest_memory_pair(pair: dict, client=None):
 
 def retrieve_memory(incoming_text: str, relationship: str, n_results: int = 3):
     """Retrieve similar memories from the appropriate Chroma collection."""
-    # Embed the new incoming text
-    query_embedding = generate_embedding(incoming_text)
+    # Embed the new incoming text as a query
+    query_embedding = generate_embedding(incoming_text, is_query=True)
 
     # Query the appropriate collection
     collection_name = f"whatsapp_memory_{relationship}"

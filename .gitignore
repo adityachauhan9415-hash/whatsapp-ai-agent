@@ -1,1 +1,4 @@
 data/chroma/
+__pycache__/
+*.pyc
+data/processed/prateek_pairs.json
