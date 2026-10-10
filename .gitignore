@@ -2,3 +2,5 @@ data/chroma/
 __pycache__/
 *.pyc
 data/processed/prateek_pairs.json
+whatsapp/auth_info_baileys/
+node_modules/
