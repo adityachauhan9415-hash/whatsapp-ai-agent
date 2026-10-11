@@ -1,5 +1,6 @@
 import os
 from google import genai
+from openai import OpenAI
 from typing import List, Dict
 
 class LLMProvider:
@@ -11,6 +12,48 @@ class MockProvider(LLMProvider):
     def generate(self, prompt: str) -> str:
         """Mock provider for testing"""
         return f"Mock reply for prompt: {prompt[:50]}..."
+
+class OpenAIProvider(LLMProvider):
+    def __init__(self):
+        api_key = os.getenv('OPENAI_API_KEY')
+        if not api_key:
+            raise ValueError("OPENAI_API_KEY environment variable not set")
+        self.client = OpenAI(api_key=api_key)
+        self.model = 'gpt-6-luna'
+
+    def generate(self, prompt: str) -> str:
+        try:
+            response = self.client.responses.create(
+                model=self.model,
+                input=prompt
+            )
+            return response.output_text.strip()
+        except Exception as e:
+            raise RuntimeError(f"OpenAI API error: {str(e)}")
+
+class OllamaProvider(LLMProvider):
+    def __init__(self):
+        import requests
+        self.client = requests.Session()
+        self.model = 'qwen2.5:3b'
+        self.url = 'http://localhost:11434/api/generate'
+
+    def generate(self, prompt: str) -> str:
+        try:
+            response = self.client.post(
+                self.url,
+                json={
+                    'model': self.model,
+                    'prompt': prompt,
+                    'stream': False,
+                    'options': {'temperature': 0.7}
+                },
+                timeout=10
+            )
+            response.raise_for_status()
+            return response.json()['response'].strip()
+        except Exception as e:
+            raise RuntimeError(f"Ollama API error: {str(e)}")
 
 class GeminiProvider(LLMProvider):
     def __init__(self):
@@ -32,11 +75,17 @@ class GeminiProvider(LLMProvider):
                 )
                 return response.text
             except Exception as e:
-                error_code = getattr(e.args[0].get('error', {}).get('code'), 'code', None)
+                # Safely extract error code from Gemini API errors
+                error_code = None
+                if hasattr(e, 'args') and len(e.args) > 0 and isinstance(e.args[0], dict):
+                    error_info = e.args[0].get('error')
+                    if isinstance(error_info, dict):
+                        error_code = error_info.get('code')
+
                 if error_code == 503 and model == self.primary_model:
                     # Retry with fallback model on 503 error
                     continue
-                raise RuntimeError(f"Gemini API error: {str(e)}")
+                raise e
 
 def load_persona() -> str:
     """Load persona definition from config/persona.md"""

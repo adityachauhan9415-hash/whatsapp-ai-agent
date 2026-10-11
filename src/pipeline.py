@@ -7,8 +7,8 @@ from generator import generate_reply, MockProvider
 from delay import calculate_reply_delay
 
 class Pipeline:
-    def __init__(self):
-        self.provider = MockProvider()
+    def __init__(self, provider=None):
+        self.provider = provider or MockProvider()
 
     def process_message(self, sender: str, message: str) -> dict:
         """Process a message through the pipeline."""

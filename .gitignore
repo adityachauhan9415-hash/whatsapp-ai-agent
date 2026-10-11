@@ -4,3 +4,4 @@ __pycache__/
 data/processed/prateek_pairs.json
 whatsapp/auth_info_baileys/
 node_modules/
+whatsapp/data/

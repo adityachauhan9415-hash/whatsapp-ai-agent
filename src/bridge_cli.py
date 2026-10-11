@@ -3,9 +3,10 @@
 import sys
 import json
 from pipeline import Pipeline
+from generator import OllamaProvider
 
 # Initialize pipeline
-pipeline = Pipeline()
+pipeline = Pipeline(provider=OllamaProvider())
 
 # Read input from stdin or command line
 if not sys.stdin.isatty():
