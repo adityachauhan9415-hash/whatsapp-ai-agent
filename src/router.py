@@ -8,7 +8,7 @@ CONTACT_MAPPING = {
     "BestFriend": "friend",
     "WorkColleague": "professional",
     "Boss": "professional",
-    "48821262377141@lid": "friend",
+    "example_friend@lid": "friend",
 }
 
 def route_sender(sender_name: str) -> str:
